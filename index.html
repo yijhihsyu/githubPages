@@ -32,6 +32,29 @@
             margin-bottom: 20px;
         }
 
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .buttons button {
+            flex: 1;
+            padding: 10px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #ddd;
+            color: black;
+        }
+
+        .buttons button.active {
+            background-color: #007BFF;
+            color: white;
+        }
+
         label {
             display: block;
             margin-bottom: 5px;
@@ -39,14 +62,14 @@
         }
 
         input {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
 
-        button {
+        button.calculate {
             width: 100%;
             padding: 10px;
             background-color: #007BFF;
@@ -57,7 +80,7 @@
             cursor: pointer;
         }
 
-        button:hover {
+        button.calculate:hover {
             background-color: #0056b3;
         }
 
@@ -79,11 +102,10 @@
     <div class="container">
         <h1>滑台計算器</h1>
 
-        <label for="calculationType">計算類型:</label>
-        <select id="calculationType" onchange="toggleInputs()">
-            <option value="time">計算時間</option>
-            <option value="rpm">計算轉速</option>
-        </select>
+        <div class="buttons">
+            <button id="btnTime" onclick="switchMode('time')" class="active">計算時間</button>
+            <button id="btnRpm" onclick="switchMode('rpm')">計算轉速</button>
+        </div>
 
         <div id="inputFields">
             <label for="travel">行程 (mm):</label>
@@ -103,28 +125,35 @@
             </div>
         </div>
 
-        <button onclick="calculate()">計算</button>
+        <button class="calculate" onclick="calculate()">計算</button>
 
         <div class="result" id="result"></div>
     </div>
 
     <script>
-        function toggleInputs() {
-            const calculationType = document.getElementById('calculationType').value;
-            const timeInput = document.getElementById('timeInput');
-            const rpmInput = document.getElementById('rpmInput');
+        let currentMode = 'time';
 
-            if (calculationType === 'time') {
-                timeInput.style.display = 'block';
-                rpmInput.style.display = 'none';
-            } else {
-                timeInput.style.display = 'none';
-                rpmInput.style.display = 'block';
-            }
+        function switchMode(mode) {
+            // 清空輸入框
+            document.getElementById('travel').value = '';
+            document.getElementById('pitch').value = '';
+            document.getElementById('rpm').value = '';
+            document.getElementById('time').value = '';
+            document.getElementById('result').innerText = '';
+
+            // 切換模式
+            currentMode = mode;
+
+            // 更新按鈕樣式
+            document.getElementById('btnTime').classList.toggle('active', mode === 'time');
+            document.getElementById('btnRpm').classList.toggle('active', mode === 'rpm');
+
+            // 顯示/隱藏輸入框
+            document.getElementById('timeInput').style.display = mode === 'time' ? 'block' : 'none';
+            document.getElementById('rpmInput').style.display = mode === 'rpm' ? 'block' : 'none';
         }
 
         function calculate() {
-            const calculationType = document.getElementById('calculationType').value;
             const travel = parseFloat(document.getElementById('travel').value);
             const pitch = parseFloat(document.getElementById('pitch').value);
             const resultElement = document.getElementById('result');
@@ -134,7 +163,7 @@
                 return;
             }
 
-            if (calculationType === 'time') {
+            if (currentMode === 'time') {
                 const rpm = parseFloat(document.getElementById('rpm').value);
                 if (isNaN(rpm) || rpm <= 0) {
                     resultElement.innerText = "請輸入有效的轉速數值！";
@@ -144,7 +173,7 @@
                 const speed = rpm * pitch / 60; // mm/s
                 const time = travel / speed; // 秒
                 resultElement.innerText = `所需時間: ${time.toFixed(2)} 秒`;
-            } else if (calculationType === 'rpm') {
+            } else if (currentMode === 'rpm') {
                 const time = parseFloat(document.getElementById('time').value);
                 if (isNaN(time) || time <= 0) {
                     resultElement.innerText = "請輸入有效的時間數值！";
