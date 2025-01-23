@@ -1,12 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Github Pages</title>
+    <title>滑台計算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.2em;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Github Pages</h1>
+    <div class="container">
+        <h1>滑台計算器</h1>
+
+        <label for="calculationType">計算類型:</label>
+        <select id="calculationType" onchange="toggleInputs()">
+            <option value="time">計算時間</option>
+            <option value="rpm">計算轉速</option>
+        </select>
+
+        <div id="inputFields">
+            <label for="travel">行程 (mm):</label>
+            <input type="number" id="travel" placeholder="例如: 500">
+
+            <label for="pitch">導程 Pitch (mm):</label>
+            <input type="number" id="pitch" placeholder="例如: 10">
+
+            <div id="timeInput">
+                <label for="rpm">轉速 (RPM):</label>
+                <input type="number" id="rpm" placeholder="例如: 600">
+            </div>
+
+            <div id="rpmInput" style="display: none;">
+                <label for="time">時間 (秒):</label>
+                <input type="number" id="time" placeholder="例如: 5">
+            </div>
+        </div>
+
+        <button onclick="calculate()">計算</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function toggleInputs() {
+            const calculationType = document.getElementById('calculationType').value;
+            const timeInput = document.getElementById('timeInput');
+            const rpmInput = document.getElementById('rpmInput');
+
+            if (calculationType === 'time') {
+                timeInput.style.display = 'block';
+                rpmInput.style.display = 'none';
+            } else {
+                timeInput.style.display = 'none';
+                rpmInput.style.display = 'block';
+            }
+        }
+
+        function calculate() {
+            const calculationType = document.getElementById('calculationType').value;
+            const travel = parseFloat(document.getElementById('travel').value);
+            const pitch = parseFloat(document.getElementById('pitch').value);
+            const resultElement = document.getElementById('result');
+
+            if (isNaN(travel) || isNaN(pitch) || travel <= 0 || pitch <= 0) {
+                resultElement.innerText = "請輸入有效的行程和導程數值！";
+                return;
+            }
+
+            if (calculationType === 'time') {
+                const rpm = parseFloat(document.getElementById('rpm').value);
+                if (isNaN(rpm) || rpm <= 0) {
+                    resultElement.innerText = "請輸入有效的轉速數值！";
+                    return;
+                }
+                // 計算時間
+                const speed = rpm * pitch / 60; // mm/s
+                const time = travel / speed; // 秒
+                resultElement.innerText = `所需時間: ${time.toFixed(2)} 秒`;
+            } else if (calculationType === 'rpm') {
+                const time = parseFloat(document.getElementById('time').value);
+                if (isNaN(time) || time <= 0) {
+                    resultElement.innerText = "請輸入有效的時間數值！";
+                    return;
+                }
+                // 計算轉速
+                const speed = travel / time; // mm/s
+                const rpm = (speed / pitch) * 60; // RPM
+                resultElement.innerText = `所需轉速: ${rpm.toFixed(2)} RPM`;
+            }
+        }
+    </script>
 </body>
+
 </html>
